@@ -15,7 +15,7 @@ services:
       - ./unbound:/opt/unbound/etc/unbound/
     networks:
       private_network:
-        ipv4_address: 10.2.0.200
+        ipv4_address: ${UNBOUND_IPV4_ADDRESS}
     cap_add:
       - NET_ADMIN
     env_file: .env
@@ -28,6 +28,9 @@ services:
     ports:
       - 5000:5000
       - 51820:51820/udp
+    dns:
+      - ${PIHOLE_IPV4_ADDRESS}
+      - ${UNBOUND_IPV4_ADDRESS}
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -72,5 +75,5 @@ services:
       - NET_ADMIN
     networks:
       private_network:
-        ipv4_address: 10.2.0.100
+        ipv4_address: ${PIHOLE_IPV4_ADDRESS}
     env_file: ./.env

@@ -53,9 +53,6 @@ cd wirehole
 cp .env.example .env
 nano .env  # Or use any text editor of your choice to edit the .env file
 
-# Replace the public IP placeholder in the docker-compose.yml
-sed -i "s/REPLACE_ME_WITH_YOUR_PUBLIC_IP/$(curl -s ifconfig.me)/g" docker-compose.yml
-
 # Start the Docker containers
 docker compose up
 ```
@@ -81,11 +78,10 @@ The `.env` file contains a series of environment variables that are essential fo
 - `UNBOUND_IPV4_ADDRESS`: The static IP address assigned to Unbound, ensuring it is reachable by Pi-hole.
 - `PIHOLE_IPV4_ADDRESS`: The static IP address assigned to Pi-hole, allowing it to serve DNS requests for the network.
 - `WIREGUARD_SERVER_PORT`: The port on which the WireGuard server will listen for connections.
-- `WIREGUARD_PEER_DNS`: The DNS server that WireGuard clients will use, which is typically set to the Pi-hole's address.
 
 ### WireGuard Settings
 
-- `WIREGUARD_PEERS`: Specifies the number of peer/client configurations to generate for WireGuard.
+- `PEERS`: Specifies the number of peer/client configurations to generate for WireGuard.
 
 ### WireGuard-UI Settings
 
