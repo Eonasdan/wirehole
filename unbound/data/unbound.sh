@@ -370,7 +370,7 @@ fi
 
 mkdir -p /opt/unbound/etc/unbound/dev && \
 cp -a /dev/random /dev/urandom /dev/null /opt/unbound/etc/unbound/dev/
-
+touch /opt/unbound/etc/unbound/unbound.log && \
 mkdir -p -m 700 /opt/unbound/etc/unbound/var && \
 chown _unbound:_unbound /opt/unbound/etc/unbound/var && \
 chown _unbound:_unbound /opt/unbound/etc/unbound/unbound.log && \
