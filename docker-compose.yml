@@ -7,73 +7,77 @@ networks:
         - subnet: 10.2.0.0/24
 services:
   unbound:
-    image: mvance/unbound:latest
+    image: mvance/unbound:1.18.0
     container_name: unbound
     restart: unless-stopped
     hostname: unbound
     volumes:
-      - ./unbound:/opt/unbound/etc/unbound/
+      - /data/unbound:/opt/unbound/etc/unbound/
     networks:
       private_network:
         ipv4_address: ${UNBOUND_IPV4_ADDRESS}
     cap_add:
       - NET_ADMIN
-    env_file: .env
-  wireguard:
-    depends_on:
-      - unbound
-      - pihole
-    image: linuxserver/wireguard
-    container_name: wireguard
-    ports:
-      - 5000:5000
-      - 51820:51820/udp
-    dns:
-      - ${PIHOLE_IPV4_ADDRESS}
-      - ${UNBOUND_IPV4_ADDRESS}
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-      - net.ipv4.ip_forward=1
-    volumes:
-      - ./config:/config
-    env_file: .env
-
-  wireguard-ui:
-    image: ngoduykhanh/wireguard-ui:latest
-    container_name: wireguard-ui
-    depends_on:
-      - wireguard
-    cap_add:
-      - NET_ADMIN
-    network_mode: service:wireguard
-    logging:
-      driver: json-file
-      options:
-        max-size: 50m
-    volumes:
-      - ./db:/app/db
-      - ./config:/config
-    env_file: .env
+    env_file: ./.env
 
   pihole:
     depends_on:
       - unbound
     container_name: pihole
-    image: pihole/pihole:latest
+    image: pihole/pihole:2024.01.0
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8080:80/tcp"
     restart: unless-stopped
     hostname: pihole
     dns:
       - 127.0.0.1
-      - ${PIHOLE_DNS}
+      - ${UNBOUND_IPV4_ADDRESS}
     volumes:
-      - ./etc-pihole/:/etc/pihole/
-      - ./etc-dnsmasq.d/:/etc/dnsmasq.d/
+      - /data/pihole:/etc/pihole/
+      - /data/dnsmasq.d/:/etc/dnsmasq.d/
     cap_add:
       - NET_ADMIN
     networks:
       private_network:
         ipv4_address: ${PIHOLE_IPV4_ADDRESS}
+    env_file: ./.env
+
+  wg-easy:
+    depends_on:
+      - unbound
+      - pihole
+    image: ghcr.io/wg-easy/wg-easy
+    container_name: wg-easy
+    volumes:
+      - /data/wireguard/:/etc/wireguard
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    dns:
+      - ${PIHOLE_IPV4_ADDRESS}
+      - ${UNBOUND_IPV4_ADDRESS}
+    networks:
+      private_network:
+        ipv4_address: ${WG_IPV4_ADDRESS}
+    env_file: ./.env
+
+  homeassistant:
+    depends_on:
+      - unbound
+      - pihole
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    volumes:
+      - /data/homeassistant/:/config
+    network_mode: host
+    privileged: true
     env_file: ./.env
