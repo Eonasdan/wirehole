@@ -7,7 +7,7 @@ networks:
         - subnet: 10.2.0.0/24
 services:
   unbound:
-    image: mvance/unbound:1.18.0
+    image: klutchell/unbound
     container_name: unbound
     restart: unless-stopped
     hostname: unbound
@@ -28,7 +28,7 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "8080:80/tcp"
+      - "80:80/tcp"
     restart: unless-stopped
     hostname: pihole
     dns:
