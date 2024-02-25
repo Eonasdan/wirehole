@@ -18,7 +18,7 @@ services:
         ipv4_address: ${UNBOUND_IPV4_ADDRESS}
     cap_add:
       - NET_ADMIN
-    env_file: ./.env
+    env_file: .env
 
   pihole:
     depends_on:
@@ -42,7 +42,7 @@ services:
     networks:
       private_network:
         ipv4_address: ${PIHOLE_IPV4_ADDRESS}
-    env_file: ./.env
+    env_file: .env
 
   wg-easy:
     depends_on:
@@ -68,16 +68,15 @@ services:
     networks:
       private_network:
         ipv4_address: ${WG_IPV4_ADDRESS}
-    env_file: ./.env
-
+    env_file: .env
+  # The home assistant UI is available on the host IP:8123
+  # You can expose a port and NOT use `network_mode: host`
+  # However, you will not be able to get device discovery
   homeassistant:
-    depends_on:
-      - unbound
-      - pihole
     image: ghcr.io/home-assistant/home-assistant:stable
     container_name: homeassistant
     volumes:
       - /data/homeassistant/:/config
     network_mode: host
     privileged: true
-    env_file: ./.env
+    env_file: .env
