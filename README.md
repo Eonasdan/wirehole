@@ -5,59 +5,46 @@ WireHole is a docker-compose project that combines WireGuard, PiHole, and Unboun
 
 ## Author
 
-👤 **Devin Stokes**
+👤 **Jonathan Peterson**
 
-- Twitter: [@DevinStokes](https://twitter.com/DevinStokes)
-- GitHub: [@IAmStoxe](https://github.com/IAmStoxe)
+- Twitter: [@Eonasdan](https://twitter.com/Eonasdan)
+- GitHub: [@Eonasdan](https://github.com/Eonasdan)
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/IAmStoxe/wirehole/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Eonasdan/wirehole/issues).
 
 ## Show your support
 
 Give a ⭐ if this project helped you!
 
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-orange.png)](https://www.buymeacoffee.com/stoxe)
-
----
-
-### Supported Architectures
-
-The image supports multiple architectures such as `x86-64`, `arm64`, and `armhf`. The `linuxserver/wireguard` image automatically selects the correct image for your architecture.
-
-**The architectures supported by this image are:**
-
-| Architecture | Tag            |
-| ------------ | -------------- |
-| x86-64       | amd64-latest   |
-| arm64        | arm64v8-latest |
-| armhf        | arm32v7-latest |
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/eonasdan)
 
 ---
 
 ### Quickstart
 
-To begin using WireHole, clone the repository and start the containers:
+To begin using WireHole, clone the repository and start the containers.
 
 ```bash
-#!/bin/bash
-
 # Clone the WireHole repository from GitHub
-git clone https://github.com/IAmStoxe/wirehole.git
+git clone https://github.com/eonasdan/wirehole.git
 
-# Change directory to the cloned repository
-cd wirehole
+# Copy the data folder to the root directory
+cp wirehole/data /data
+
+# Enter the docker folder
+cd /data/docker
 
 # Update the .env file with your configuration
 cp .env.example .env
-nano .env  # Or use any text editor of your choice to edit the .env file
+nano .env
 
 # Start the Docker containers
-docker compose up
+docker compose up -d
 ```
 
-Remember to set secure passwords for `WGUI_SESSION_SECRET`, `WGUI_PASSWORD`, and `WEBPASSWORD` in your `.env` file.
+Remember to set secure passwords for `PASSWORD`, and `WEBPASSWORD` in your `.env` file.
 
 ---
 
@@ -77,23 +64,21 @@ The `.env` file contains a series of environment variables that are essential fo
 
 - `UNBOUND_IPV4_ADDRESS`: The static IP address assigned to Unbound, ensuring it is reachable by Pi-hole.
 - `PIHOLE_IPV4_ADDRESS`: The static IP address assigned to Pi-hole, allowing it to serve DNS requests for the network.
-- `WIREGUARD_SERVER_PORT`: The port on which the WireGuard server will listen for connections.
+- `WG_IPV4_ADDRESS`: The static IP address for WireGuard Easy.
 
 ### WireGuard Settings
 
-- `PEERS`: Specifies the number of peer/client configurations to generate for WireGuard.
-
-### WireGuard-UI Settings
-
-- `WGUI_SESSION_SECRET`: A secret key used to encrypt session data for WireGuard-UI. This should be set to a secure, random value.
-- `WGUI_USERNAME` and `WGUI_PASSWORD`: Credentials for accessing the WireGuard-UI interface.
-- `WGUI_MANAGE_START`: When set to `true`, WireGuard-UI will manage the starting of the WireGuard service.
-- `WGUI_MANAGE_RESTART`: When set to `true`, WireGuard-UI will manage the restarting of the WireGuard service.
+- `WG_HOST`: Your WAN IP, or a Dynamic DNS hostname.
+- `WG_PORT`: The public UDP port of your VPN server. WireGuard will always listen on 51820 inside the Docker container.
+- `WG_DEFAULT_ADDRESS`: Clients IP address range.
+- `WG_DEFAULT_DNS`:  DNS server clients will use. If set to blank value, clients will not use any DNS.
+- `PASSWORD`: A password to log in on the Web UI.
 
 ### Pi-hole Settings
 
 - `WEBPASSWORD`: The password for accessing the Pi-hole web interface. It should be set to a secure value to prevent unauthorized access.
 - `PIHOLE_DNS`: The IP address of the Unbound server used by Pi-hole to resolve DNS queries.
+- There are other settings that you can see an example in the `env.example` file. Check the Pi-hole docker repo for more.
 
 Remember to replace any default or placeholder values with secure, unique values before deploying your services.
 
@@ -105,25 +90,17 @@ For a split-tunnel VPN, configure your WireGuard client `AllowedIps` to `10.2.0.
 
 ---
 
-### Accessing the Web Panel (WireGuard-UI)
+### Accessing the Web Panel (WireGuard Easy)
 
 Manage your WireGuard VPN through the WireGuard-UI at:
 
-`http://{YOUR_SERVER_IP}:5000`
+`http://{YOUR_SERVER_IP}:51821`
 
-Log in with the `WGUI_USERNAME` and `WGUI_PASSWORD` you have set in your `.env` file.
-
-### Features of WireGuard-UI
-
-- Client Management: Add, remove, and manage clients.
-- Authentication: Secure login with a username and password.
-- Configurations: Update global server settings and manage client configurations.
-
----
+Log in with the `PASSWORD` you have set in your `.env` file.
 
 ### Access PiHole
 
-Connect to WireGuard and access the Pi-hole admin panel at `http://10.2.0.100/admin`. The login password is the one set as `WEBPASSWORD` in your `.env` file.
+Connect to WireGuard and access the Pi-hole admin panel at `http://{YOUR_SERVER_IP}/admin`. The login password is the one set as `WEBPASSWORD` in your `.env` file.
 
 ---
 
@@ -131,32 +108,19 @@ Connect to WireGuard and access the Pi-hole admin panel at `http://10.2.0.100/ad
 
 Configure DDNS by setting `WG_HOST` in your `.env` file to your DDNS URL.
 
-```yaml
-wireguard:
-  environment:
-    - WG_HOST=my.ddns.net
-```
-
----
-
-### Configuring / Parameters
-
-Explain all the environment variables from your `.env` file here. (Refer to the previous section where we provided a table of explanations for each variable.)
-
----
-
-### Additional Settings and Considerations
-
-Discuss any additional settings such as Docker secrets, umask settings, user/group identifiers, adding clients, modifying DNS providers, and networking considerations. Make sure to update any instructions to match the current setup.
-
 ---
 
 ### Support and Updates
 
-Provide information on how to access the shell while the container is running, view logs, update containers, and handle frequently asked questions. Ensure all the commands and steps are updated to reflect the current versions and practices.
+To update Unbound and WG-Easy to the latest image: simply stop, and remove the containers and run `docker compose up -d` again. You may want to run `docker pull [image]` before otherwise, you may have an issue resolving the image download.
+
+The Pi-hole docker team recommends that you target a specific version of the image and not use the `latest`. You can modify the docker-compose file to update the tag.
 
 ---
 
 ###### Acknowledgements
 
-Credit to LinuxServer.io for their maintenance of the Wireguard image and other contributions to the project.
+* [@klutchell](https://github.com/klutchell/unbound-docker) for his unbound docker image.
+* [Pi-hole](https://github.com/pi-hole/docker-pi-hole) for their docker image and the Pi-hole project.
+* [wg-easy](https://github.com/wg-easy/wg-easy) for their docker image.
+* [@DevinStokes](https://github.com/IAmStoxe) for his original wirehole repo.
